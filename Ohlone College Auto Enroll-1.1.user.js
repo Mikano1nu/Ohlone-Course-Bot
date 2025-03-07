@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Ohlone College Auto Enroll
 // @namespace    http://tampermonkey.net/
-// @version      1.1
+// @version      1.2
 // @description  Auto enroll in Ohlone College courses based on course name and professor
 // @author       Your Name
 // @match        https://selfservice.ohlone.edu:8443/student/Planning/DegreePlans
@@ -15,7 +15,7 @@
     let enrollUrl = localStorage.getItem('enrollUrl') || 'https://selfservice.ohlone.edu:8443/student/Planning/DegreePlans';
     let courseName = localStorage.getItem('courseName') || '';
     let professorName = localStorage.getItem('professorName') || '';
-
+    
     // 创建控制面板
     const controlPanel = document.createElement('div');
     controlPanel.innerHTML = `
@@ -36,11 +36,11 @@
         enrollUrl = document.getElementById('enrollUrlInput').value;
         courseName = document.getElementById('courseNameInput').value;
         professorName = document.getElementById('professorNameInput').value;
-
+        
         localStorage.setItem('enrollUrl', enrollUrl);
         localStorage.setItem('courseName', courseName);
         localStorage.setItem('professorName', professorName);
-
+        
         alert('设置已保存！');
     });
 
@@ -49,6 +49,12 @@
         console.log('尝试自动抢课...');
 
         let courseElements = document.querySelectorAll('.course-listing'); // 课程列表元素
+        if (courseElements.length === 0) {
+            console.log('课程列表未加载，稍后重试...');
+            setTimeout(autoEnroll, 2000); // 2 秒后再次尝试
+            return;
+        }
+
         courseElements.forEach(course => {
             let courseTitle = course.querySelector('.course-title')?.innerText || '';
             let professor = course.querySelector('.professor-name')?.innerText || '';
@@ -65,11 +71,23 @@
             }
         });
     }
+    
+    // 页面加载后执行抢课逻辑
+    window.onload = function() {
+        console.log("页面加载完成，启动自动选课...");
+        setTimeout(autoEnroll, 2000); // 2秒后开始抢课
+    };
 
-    // 监听 URL 变化 (防止刷新后失效)
+    // 监听 URL 变化，确保脚本持续运行
     setInterval(() => {
+        console.log("当前网址:", window.location.href);
+        console.log("目标选课网址:", enrollUrl);
+
         if (window.location.href.includes(enrollUrl)) {
+            console.log("匹配成功，执行抢课逻辑...");
             autoEnroll();
+        } else {
+            console.log("当前页面不匹配选课网址，等待...");
         }
     }, 3000); // 每 3 秒检查一次
 })();
