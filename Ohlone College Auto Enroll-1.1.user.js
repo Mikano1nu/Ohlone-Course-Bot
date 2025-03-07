@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Ohlone College Auto Enroll
 // @namespace    http://tampermonkey.net/
-// @version      1.2
+// @version      1.3
 // @description  Auto enroll in Ohlone College courses based on course name and professor
 // @author       Your Name
 // @match        https://selfservice.ohlone.edu:8443/student/Planning/DegreePlans
@@ -15,7 +15,7 @@
     let enrollUrl = localStorage.getItem('enrollUrl') || 'https://selfservice.ohlone.edu:8443/student/Planning/DegreePlans';
     let courseName = localStorage.getItem('courseName') || '';
     let professorName = localStorage.getItem('professorName') || '';
-    
+
     // 创建控制面板
     const controlPanel = document.createElement('div');
     controlPanel.innerHTML = `
@@ -36,12 +36,13 @@
         enrollUrl = document.getElementById('enrollUrlInput').value;
         courseName = document.getElementById('courseNameInput').value;
         professorName = document.getElementById('professorNameInput').value;
-        
+
         localStorage.setItem('enrollUrl', enrollUrl);
         localStorage.setItem('courseName', courseName);
         localStorage.setItem('professorName', professorName);
-        
+
         alert('设置已保存！');
+        autoEnroll(); // 立即执行抢课逻辑
     });
 
     // 自动抢课函数
@@ -71,7 +72,7 @@
             }
         });
     }
-    
+
     // 页面加载后执行抢课逻辑
     window.onload = function() {
         console.log("页面加载完成，启动自动选课...");
@@ -89,5 +90,5 @@
         } else {
             console.log("当前页面不匹配选课网址，等待...");
         }
-    }, 3000); // 每 3 秒检查一次
+    }, 300); // 每 0.3 秒检查一次
 })();
